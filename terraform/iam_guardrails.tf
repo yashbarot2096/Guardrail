@@ -21,7 +21,7 @@ data "aws_iam_policy_document" "lab_boundary" {
       "iam:Set*",
       "iam:PassRole",
     ]
-    resources = ["*"]
+    not_resources = ["arn:${local.partition}:iam::${local.account_id}:mfa/*"]
   }
 
   statement {

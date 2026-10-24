@@ -29,3 +29,4 @@ resource "aws_iam_user_group_membership" "lab" {
   user   = aws_iam_user.lab[each.key].name
   groups = [aws_iam_group.department[each.value.department].name]
 }
+
