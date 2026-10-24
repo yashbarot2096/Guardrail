@@ -14,8 +14,9 @@ resource "aws_iam_group" "department" {
 resource "aws_iam_user" "lab" {
   for_each = local.users
 
-  name = each.key
-  path = "/guardrail/"
+  name                 = each.key
+  path                 = "/guardrail/"
+  permissions_boundary = aws_iam_policy.lab_boundary.arn
 
   tags = {
     Department = each.value.department
