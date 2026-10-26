@@ -19,6 +19,13 @@ resource "aws_guardduty_detector_feature" "disabled" {
   detector_id = aws_guardduty_detector.main.id
   name        = each.key
   status      = "DISABLED"
+
+  # AWS added a sub-setting (RDS_DATA_RISK) under RDS_LOGIN_EVENTS that this
+  # resource doesn't manage. It is off while the parent feature is off, so we
+  # ignore it to keep the plan clean.
+  lifecycle {
+    ignore_changes = [additional_configuration]
+  }
 }
 
 resource "aws_accessanalyzer_analyzer" "account" {
