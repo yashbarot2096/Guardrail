@@ -10,7 +10,19 @@ variable "alert_email" {
 }
 
 variable "s3_remediation_dry_run" {
-  description = "true = only report what would be fixed; false = actually fix public buckets"
+  description = "true = only report public S3 buckets; false = actually fix them"
   type        = bool
   default     = true
+}
+
+variable "keys_remediation_dry_run" {
+  description = "true = only report compromised IAM keys; false = actually deactivate them"
+  type        = bool
+  default     = true
+}
+
+variable "protected_iam_users" {
+  description = "IAM user that the key-quarantine Lambda must never touch (your break-glass admin)"
+  type        = string
+  default     = "Yash_Admin"
 }
