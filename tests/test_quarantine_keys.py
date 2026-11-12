@@ -1,6 +1,7 @@
 """Tests for the leaked-key response Lambda. Uses moto (fake AWS) - never
 touches a real account."""
 
+import importlib.util
 import sys
 from pathlib import Path
 
@@ -8,10 +9,15 @@ import boto3
 import pytest
 from moto import mock_aws
 
+# See the matching comment in test_s3_remediation.py: both Lambdas are named
+# remediate.py, so each test file loads its own under a distinct module name
+# instead of a plain "import remediate", to avoid the two colliding when
+# pytest runs both test files in one process (as CI does).
 LAMBDA_DIR = Path(__file__).resolve().parents[1] / "lambdas" / "quarantine_keys"
-sys.path.insert(0, str(LAMBDA_DIR))
-
-import remediate  # noqa: E402
+_spec = importlib.util.spec_from_file_location("keys_remediate", LAMBDA_DIR / "remediate.py")
+remediate = importlib.util.module_from_spec(_spec)
+sys.modules["keys_remediate"] = remediate
+_spec.loader.exec_module(remediate)
 
 USER = "leaky.user"
 QUAR_ARN = "arn:aws:iam::aws:policy/AWSCompromisedKeyQuarantineV3"

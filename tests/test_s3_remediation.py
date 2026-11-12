@@ -4,6 +4,7 @@ These tests NEVER touch your real AWS account. moto (mock_aws) pretends to be
 AWS inside your computer's memory, so we can create "public" buckets freely.
 """
 
+import importlib.util
 import sys
 from pathlib import Path
 
@@ -11,11 +12,20 @@ import boto3
 import pytest
 from moto import mock_aws
 
-# Make the Lambda folder importable (the Lambda lives outside the tests folder).
+# Load the Lambda's remediate.py directly, under a name unique to THIS test
+# file. Both Lambdas happen to be called remediate.py. A plain
+# "import remediate" here, plus the same line in test_quarantine_keys.py,
+# would collide: Python caches modules by name, so whichever test file's
+# "import remediate" runs second would get handed back the FIRST file's
+# already-loaded module instead of reading its own remediate.py. When both
+# test files run together in one pytest process (as CI does), that silently
+# swaps in the wrong Lambda's code. Giving each one a distinct name in
+# sys.modules avoids the collision entirely.
 LAMBDA_DIR = Path(__file__).resolve().parents[1] / "lambdas" / "s3_public_access"
-sys.path.insert(0, str(LAMBDA_DIR))
-
-import remediate  # noqa: E402
+_spec = importlib.util.spec_from_file_location("s3_remediate", LAMBDA_DIR / "remediate.py")
+remediate = importlib.util.module_from_spec(_spec)
+sys.modules["s3_remediate"] = remediate
+_spec.loader.exec_module(remediate)
 
 BUCKET = "guardrail-test-bucket"
 NO_BLOCK = dict.fromkeys(remediate.BLOCK_KEYS, False)
