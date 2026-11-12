@@ -1,5 +1,6 @@
 resource "aws_sns_topic" "alerts" {
-  name = "guardrail-alerts"
+  name              = "guardrail-alerts"
+  kms_master_key_id = "alias/aws/sns" # AWS-managed key: encrypts alerts at rest, no extra cost
 }
 
 resource "aws_sns_topic_subscription" "email" {

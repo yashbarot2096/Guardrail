@@ -10,6 +10,8 @@ data "archive_file" "key_quarantine" {
 }
 
 resource "aws_cloudwatch_log_group" "key_quarantine" {
+  #checkov:skip=CKV_AWS_158:Lambda logs only (no secrets logged); AWS-owned-key encryption at rest is adequate for a lab project, avoiding extra KMS key-policy complexity
+  #checkov:skip=CKV_AWS_338:14-day retention is a deliberate cost/noise control for a lab; the audit trail of record is CloudTrail -> the versioned, 30-day log bucket, not these execution logs
   name              = "/aws/lambda/${local.keys_fn_name}"
   retention_in_days = 14
 }
@@ -76,14 +78,20 @@ resource "aws_iam_role_policy" "key_quarantine" {
 }
 
 resource "aws_lambda_function" "key_quarantine" {
-  function_name    = local.keys_fn_name
-  role             = aws_iam_role.key_quarantine.arn
-  runtime          = "python3.13"
-  handler          = "remediate.handler"
-  filename         = data.archive_file.key_quarantine.output_path
-  source_code_hash = data.archive_file.key_quarantine.output_base64sha256
-  timeout          = 30
-  memory_size      = 128
+  #checkov:skip=CKV_AWS_116:No DLQ - every invocation already logs its outcome and sends an SNS alert; add a DLQ if this were handling untrusted, high-volume input
+  #checkov:skip=CKV_AWS_117:No VPC - this function only calls AWS APIs over AWS's public endpoints, never a private network resource; a VPC would add a NAT gateway cost with no security benefit
+  #checkov:skip=CKV_AWS_272:No code signing - AWS Signer is enterprise supply-chain tooling, disproportionate for a single-developer lab project
+  #checkov:skip=CKV_AWS_173:Default AWS-owned-key encryption is adequate - none of these environment variables are secrets; no credentials are ever placed in Lambda environment variables
+  #checkov:skip=CKV_AWS_50:X-Ray tracing is an observability nice-to-have, not a security control, and adds minor cost for a lab project
+  reserved_concurrent_executions = 5 # caps runaway invocations/cost if an event storm ever occurs
+  function_name                  = local.keys_fn_name
+  role                           = aws_iam_role.key_quarantine.arn
+  runtime                        = "python3.13"
+  handler                        = "remediate.handler"
+  filename                       = data.archive_file.key_quarantine.output_path
+  source_code_hash               = data.archive_file.key_quarantine.output_base64sha256
+  timeout                        = 30
+  memory_size                    = 128
 
   environment {
     variables = {

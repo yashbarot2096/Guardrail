@@ -1,4 +1,5 @@
 data "aws_iam_policy_document" "require_mfa" {
+  #checkov:skip=CKV_AWS_356:The "*" resources here belong to two kinds of statement that both require it: read-only list/describe MFA actions (no narrower ARN type exists), and the DenyEverythingUnlessMFA statement, which must cover "*" by design since it blocks all unauthenticated-by-MFA actions.
   statement {
     sid       = "AllowListVirtualMFADevices"
     effect    = "Allow"

@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  python-tests:
+    name: Python unit tests (Lambdas)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run Lambda unit tests
+        # test_iam_policies.py is excluded on purpose: it calls AWS's real
+        # simulate_principal_policy against the live 50-user lab, so it's an
+        # INTEGRATION test that needs real AWS credentials and deployed
+        # infrastructure. It isn't safe or appropriate to run on every PR -
+        # it's run manually, locally, as a deployed-infrastructure check.
+        run: pytest tests/test_s3_remediation.py tests/test_quarantine_keys.py -v
+
+  terraform-checks:
+    name: Terraform format, validate, lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.0"
+      - name: terraform fmt (check only, no changes)
+        run: terraform fmt -check -recursive
+      - name: terraform init (no AWS credentials needed for this)
+        run: terraform init
+      - name: terraform validate
+        run: terraform validate
+      - name: Set up tflint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: "v0.65.0"
+      - name: Run tflint
+        run: |
+          tflint --init
+          tflint
+
+  checkov:
+    name: Checkov security scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install Checkov
+        run: pip install checkov==3.4.3
+      - name: Run Checkov against Terraform
+        run: checkov -d terraform --framework terraform --compact

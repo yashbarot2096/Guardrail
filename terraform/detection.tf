@@ -1,4 +1,5 @@
 resource "aws_guardduty_detector" "main" {
+  #checkov:skip=CKV2_AWS_3:This account intentionally is not part of an AWS Organization (joining one auto-upgrades the account's billing plan - a deliberate project decision); GuardDuty is enabled directly on this single account instead of via a delegated org admin.
   enable                       = true
   finding_publishing_frequency = "FIFTEEN_MINUTES"
 }

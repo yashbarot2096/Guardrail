@@ -1,5 +1,6 @@
 # --- Engineering: manage dev things only ---
 data "aws_iam_policy_document" "engineering" {
+  #checkov:skip=CKV_AWS_356:The "*" resource is on ec2:Describe* only, a read-only action type that AWS does not support scoping to a specific resource ARN.
   statement {
     sid       = "ReadOnlyDiscovery"
     effect    = "Allow"
@@ -98,6 +99,7 @@ data "aws_iam_policy_document" "support" {
 }
 
 resource "aws_iam_policy" "support" {
+  #checkov:skip=CKV_AWS_356:The "*" resources are on ec2:Describe* and cloudwatch:Describe*/Get*/List*, read-only action types AWS does not support scoping to a specific resource ARN.
   name   = "guardrail-support-readonly"
   path   = "/guardrail/"
   policy = data.aws_iam_policy_document.support.json

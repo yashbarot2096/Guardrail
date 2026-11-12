@@ -12,6 +12,7 @@ resource "aws_iam_group" "department" {
 }
 
 resource "aws_iam_user" "lab" {
+  #checkov:skip=CKV_AWS_273:Intentional - these are simulated users for a hands-on least-privilege IAM lab, not a real organization's workforce. A real organization would use AWS IAM Identity Center (SSO); that trade-off is documented in THREAT_MODEL.md.
   for_each = local.users
 
   name                 = each.key

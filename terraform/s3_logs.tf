@@ -1,10 +1,10 @@
 # --- The bucket ---
 resource "aws_s3_bucket" "logs" {
-  bucket = local.log_bucket_name
-
-  # LAB ONLY: lets "terraform destroy" delete the bucket even when it holds logs.
-  # In production this stays false so logs cannot be wiped by accident.
-  force_destroy = true
+  #checkov:skip=CKV_AWS_18:S3 access (server) logging would log reads/writes to this bucket; skipped for a lab to avoid extra storage cost and noise. Bucket access is already restricted to the admin principal via IAM, and the guardrail policy blocks lab-user tampering.
+  #checkov:skip=CKV2_AWS_62:No pipeline currently consumes per-object S3 event notifications from this bucket; our automated response already reacts to the underlying CloudTrail API calls via EventBridge.
+  #checkov:skip=CKV_AWS_144:Cross-region replication is a disaster-recovery feature for production evidence retention; it adds ongoing storage and transfer cost not justified for a personal lab account.
+  bucket        = local.log_bucket_name
+  force_destroy = true # lab only - never do this for real evidence
 }
 
 # --- Layer 1: nobody can ever make it public ---
