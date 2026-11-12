@@ -84,6 +84,7 @@ resource "aws_iam_group_policy_attachment" "data_team" {
 
 # --- Support: read-only troubleshooting ---
 data "aws_iam_policy_document" "support" {
+  #checkov:skip=CKV_AWS_356:The "*" resources are on ec2:Describe* and cloudwatch:Describe*/Get*/List*, read-only action types AWS does not support scoping to a specific resource ARN.
   statement {
     sid    = "ReadOnlyTroubleshooting"
     effect = "Allow"
@@ -99,7 +100,6 @@ data "aws_iam_policy_document" "support" {
 }
 
 resource "aws_iam_policy" "support" {
-  #checkov:skip=CKV_AWS_356:The "*" resources are on ec2:Describe* and cloudwatch:Describe*/Get*/List*, read-only action types AWS does not support scoping to a specific resource ARN.
   name   = "guardrail-support-readonly"
   path   = "/guardrail/"
   policy = data.aws_iam_policy_document.support.json

@@ -1,4 +1,7 @@
 data "aws_iam_policy_document" "logs_key" {
+  #checkov:skip=CKV_AWS_109:This is the KMS key's own resource policy, not an identity policy. A key policy is always scoped to the one key it is attached to, so "Resource" = "*" here means "this key" - it can never reach any other key or resource in the account, regardless of what is written here.
+  #checkov:skip=CKV_AWS_111:Same reasoning as above - the "kms:*" write access in this statement is confined to this single key by the nature of a resource policy, not widened by "Resource" = "*".
+  #checkov:skip=CKV_AWS_356:Same reasoning - "Resource" = "*" is the standard, AWS-documented syntax for a KMS key's own policy (see AWS's default key policy template); it is not an open wildcard the way it would be in an identity-based (IAM user/role) policy.
   statement {
     sid       = "EnableIAMPolicies"
     effect    = "Allow"
