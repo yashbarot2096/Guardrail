@@ -1,6 +1,6 @@
-# Guardrail — AWS Security Auto-Remediation Platform
+# Guardrail - AWS Security Auto-Remediation Platform
 
-Guardrail is an event-driven security platform on AWS that **detects misconfigurations and compromised credentials, then automatically fixes them within minutes** — no human has to notice first. Every resource is defined as code with Terraform, and every remediation Lambda is covered by an automated test suite.
+Guardrail is an event-driven security platform on AWS that **detects misconfigurations and compromised credentials, then automatically fixes them within minutes** no human has to notice first. Every resource is defined as code with Terraform, and every remediation Lambda is covered by an automated test suite.
 
 Built as a hands-on project to learn cloud security engineering the way it's actually practiced: prevent, detect, respond, and prove it with tests and infrastructure as code.
 
