@@ -85,7 +85,7 @@ Built and tested entirely within AWS free-tier limits and a small amount of prom
 - [x] GuardDuty + IAM Access Analyzer
 - [x] S3 public-bucket auto-remediation (tested live, dry-run and active modes)
 - [x] Leaked IAM key auto-quarantine (tested live, dry-run and active modes)
-- [ ] CI/CD pipeline (GitHub Actions: Checkov, tflint, pytest, `terraform plan` on PR, OIDC — no long-lived AWS keys in CI)
+- [ ] CI/CD pipeline (GitHub Actions: Checkov, tflint, pytest, `terraform plan` on PR, OIDC no long-lived AWS keys in CI)
 - [ ] EC2 quarantine response for GuardDuty findings
 - [ ] Wire GuardDuty/Access Analyzer findings into the same alert pipeline
 
